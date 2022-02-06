@@ -37,6 +37,7 @@ public class TwitterClientInit {
                 .hosts(Constants.STREAM_HOST)
                 .endpoint(endpoint)
                 .authentication(oAuth1)
+
                 .processor(new StringDelimitedProcessor(this.queue))
                 .build();
 
