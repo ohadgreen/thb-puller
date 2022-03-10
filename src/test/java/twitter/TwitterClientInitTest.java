@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TwitterClientInitTest {
 
-    private final String SEARCH_TERM1 = "basketball";
-    private final String SEARCH_TERM2 = "NBA";
+    private final String SEARCH_TERM1 = "בנט";
+    private final String SEARCH_TERM2 = "ממשלה";
     private TwitterClientInit twitterClientInit;
     Client twitterClient;
     BlockingQueue<String> queue;

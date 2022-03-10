@@ -9,6 +9,13 @@ public class TwitterPullTask {
     private List<String> searchTerms;
     private Integer requestedNumber;
 
+    public TwitterPullTask(UUID id, String userName, List<String> searchTerms, Integer requestedNumber) {
+        this.id = id;
+        this.userName = userName;
+        this.searchTerms = searchTerms;
+        this.requestedNumber = requestedNumber;
+    }
+
     public UUID getId() {
         return id;
     }

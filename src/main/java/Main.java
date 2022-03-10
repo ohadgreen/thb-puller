@@ -39,7 +39,7 @@ public class Main {
                 LOGGER.info("Key {} - Partition {} - Offset {} ", rec.key(), rec.partition(), rec.offset());
                 LOGGER.info("processing {} ", twitterPullTask);
 
-                TwitterPullJobExecutor twitterPullJobExecutor = new TwitterPullJobExecutor(new LinkedBlockingQueue<>(10000), twitterPullTask);
+                TwitterPullJobExecutor twitterPullJobExecutor = new TwitterPullJobExecutor(new LinkedBlockingQueue<>(5000), twitterPullTask);
                 threadExecutor.execute(twitterPullJobExecutor);
 
                 twitterJobsKafkaConsumer.commitSync();

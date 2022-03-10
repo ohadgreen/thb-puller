@@ -1,11 +1,20 @@
 package twitter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kafka.ProducerInit;
+import model.TweetToProcess;
 import model.TwitterPullTask;
+import model.tweet.Tweet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
 
 public class TwitterPullJobExecutor implements Runnable {
 
@@ -25,27 +34,37 @@ public class TwitterPullJobExecutor implements Runnable {
         ProducerInit kafkaProducer = new ProducerInit();
         kafkaProducer.initProducer();
 
-        for (int i = 0; i < twitterPullTask.getRequestedNumber(); i++) {
+        int relevantTweetsCount = 0;
+        Set<String> relevantLanguagesSet = new HashSet<>(Arrays.asList("en", "iw"));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        while (relevantTweetsCount <= twitterPullTask.getRequestedNumber()) {
             try {
                 String rawTweet = (String) queue.take();
-                LOGGER.info(rawTweet);
-                kafkaProducer.sendMessage(String.valueOf(twitterPullTask.getId()), rawTweet);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                Tweet tweet = objectMapper.readValue(rawTweet, Tweet.class);
+
+                if (relevantLanguagesSet.contains(tweet.getLang())) {
+                    LOGGER.info((tweet.getText().length() >= 30) ? tweet.getText().substring(30) : tweet.getText());
+                    relevantTweetsCount ++;
+                    TweetToProcess tweetToProcess = new TweetToProcess(twitterPullTask, objectMapper.writeValueAsString(tweet), (relevantTweetsCount == twitterPullTask.getRequestedNumber()));
+                    kafkaProducer.sendMessage(String.valueOf(twitterPullTask.getId()), objectMapper.writeValueAsString(tweetToProcess));
+                }
+            } catch (InterruptedException | JsonProcessingException e) {
+                LOGGER.error(e.getMessage());
             }
         }
+
+//        for (int i = 0; i < twitterPullTask.getRequestedNumber(); i++) {
+//            try {
+//                String rawTweet = (String) queue.take();
+//                LOGGER.info(rawTweet);
+//                kafkaProducer.sendMessage(String.valueOf(twitterPullTask.getId()), rawTweet);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         kafkaProducer.closeProducer();
 //        printSomeTweets(10);
-    }
-
-    private void printSomeTweets(int tweetsCount) {
-        for (int i = 0; i < tweetsCount; i++) {
-            try {
-                LOGGER.info(String.valueOf(queue.take()));
-            } catch (InterruptedException e) {
-                LOGGER.error("Twitter pull failure - " + e.getMessage());
-            }
-        }
     }
 }
