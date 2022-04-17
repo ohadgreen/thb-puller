@@ -14,7 +14,7 @@ class TwitterPullJobExecutorTest {
     void run() {
         String searchTerm = "peace";
         List<String> searchTermList  = Collections.singletonList(searchTerm);
-        TwitterPullTask tweeterPullTask = new TwitterPullTask(UUID.randomUUID(), "Tester", searchTermList, 300);
+        TwitterPullTask tweeterPullTask = new TwitterPullTask(UUID.randomUUID(), "Tester", searchTermList, 20);
 
         TwitterPullJobExecutor twitterPullJobExecutor = new TwitterPullJobExecutor(new LinkedBlockingQueue<>(500), tweeterPullTask);
         twitterPullJobExecutor.run();
